@@ -1,0 +1,38 @@
+﻿@page
+@model signaletest.Pages.IndexModel
+
+<html>
+<head>
+</head>
+<body>
+    <button id="btn">click</button>
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/signalr-client-1.0.0-alpha2-final.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var transport = signalR.TransportType.WebSockets;
+            var connection = new signalR.HubConnection(`http://${document.location.host}/news`, { transport: transport });
+            //var messageInput = document.getElementById('message');
+            //var name = prompt('Enter your name:', '');
+            //var button = document.getElementById("sendMessage");
+            connection.on('notify',
+                (message) => {
+                    alert(JSON.stringify(message));
+                });
+
+            $("#btn").click(function () {
+
+                var data = {
+                    "Id": 1,
+                    "Title": "Title",
+                    "Description": "Description"
+                };
+                connection.invoke('notify', data);
+
+            });
+
+            connection.start();
+        });
+    </script>
+</body>
+</html>
