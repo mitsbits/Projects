@@ -6,32 +6,59 @@
 </head>
 <body>
     <button id="btn">click</button>
+
+    <div id="app">
+        <h1>{{title}}</h1>
+        <div v-for="item in notifications">
+            <strong>{{item.title}}</strong>
+            <div>Article {{item.articleId}}</div>
+            <div>Language {{item.languageId}}</div>
+            <p>{{item.description}} <i>{{item.date}}</i></p>
+
+            <hr />
+        </div>
+
+
+    </div>
     <script src="~/lib/jquery/dist/jquery.js"></script>
     <script src="~/signalr-client-1.0.0-alpha2-final.js"></script>
+    <script src="~/moment.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
     <script type="text/javascript">
         $(function () {
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    title: 'Hello Live Updates!',
+                    notifications: []
+                }
+            });
+
             var transport = signalR.TransportType.WebSockets;
-            var connection = new signalR.HubConnection(`http://${document.location.host}/news`, { transport: transport });
+            var connection = new signalR.HubConnection(`http://${document.location.host}/news?articleId=1&languageId=1`, { transport: transport });
             //var messageInput = document.getElementById('message');
             //var name = prompt('Enter your name:', '');
             //var button = document.getElementById("sendMessage");
             connection.on('notify',
                 (message) => {
-                    alert(JSON.stringify(message));
+                    //alert(JSON.stringify(message));
+                    var mom = moment(message.timestamp).calendar();
+                    message.date = mom;
+                    app.notifications.push(message);
                 });
 
             $("#btn").click(function () {
 
-                var data = {
-                    "Id": 1,
-                    "Title": "Title",
-                    "Description": "Description"
-                };
-                connection.invoke('notify', data);
+
+                connection.invoke('notify');
 
             });
 
             connection.start();
+
+
+
         });
     </script>
 </body>
