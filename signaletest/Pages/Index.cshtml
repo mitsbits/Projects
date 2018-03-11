@@ -8,15 +8,45 @@
     <button id="btn">click</button>
 
     <div id="app">
-        <h1>{{title}}</h1>
-        <div v-for="item in notifications">
-            <strong>{{item.title}}</strong>
-            <div>Article {{item.articleId}}</div>
-            <div>Language {{item.languageId}}</div>
-            <p>{{item.description}} <i>{{item.date}}</i></p>
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <section style="width: 400px;">
+                        <h1>{{title}}</h1>
+                        <div v-for="item in feed">
+                            <strong>{{item.title}}</strong>
+                            <div>Article {{item.articleId}}</div>
+                            <div>Language {{item.languageId}}</div>
+                            <p>
+                                {{item.description}} <i>{{item.date}}</i>
+                            </p>
 
-            <hr />
-        </div>
+                            <figure>
+                                <img v-bind:src="item.image" />
+                                <article>
+                                    <h4>image</h4>
+                                </article>
+                            </figure>
+
+                            <hr />
+                        </div>
+                    </section>
+                </td>
+                <td>
+                    <section style="width: 400px;">
+                        <div v-for="item in filtered">
+                            <figure>
+                                <img v-bind:src="item.image" />
+                                <article>
+                                    <strong>{{item.title}}</strong>
+                                </article>
+                            </figure>
+                            <hr />
+                        </div>
+                    </section>
+                </td>
+            </tr>
+        </table>
 
 
     </div>
@@ -32,17 +62,24 @@
                 data: {
                     title: 'Hello Live Updates!',
                     notifications: []
+                },
+                computed: {
+                    filtered: function () {
+                        return this.notifications.filter(function (el) {
+                            return el.image.length > 0;
+                        });
+                    },
+                    feed() {
+                        return this.notifications.slice().reverse();
+                    }
                 }
             });
 
             var transport = signalR.TransportType.WebSockets;
             var connection = new signalR.HubConnection(`http://${document.location.host}/news?articleId=1&languageId=1`, { transport: transport });
-            //var messageInput = document.getElementById('message');
-            //var name = prompt('Enter your name:', '');
-            //var button = document.getElementById("sendMessage");
+
             connection.on('notify',
                 (message) => {
-                    //alert(JSON.stringify(message));
                     var mom = moment(message.timestamp).calendar();
                     message.date = mom;
                     app.notifications.push(message);
@@ -55,8 +92,13 @@
 
             });
 
-            connection.start();
+            function determineStop() {
+                if (Math.random() > .4) {
+                    connection.stop();
+                }
+            }
 
+            connection.start().then(() => connection.invoke('notify')).then(() => determineStop());
 
 
         });

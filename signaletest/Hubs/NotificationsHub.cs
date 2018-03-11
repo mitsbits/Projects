@@ -33,7 +33,9 @@ namespace signaletest.Hubs
             {
                 Id = r.Next(100, 1000),
                 ArticleId = r.Next(1, 3),
-                LanguageId = r.Next(1, 2)
+                LanguageId = r.Next(1, 2),
+                Image = r.Next(1, 3) == 2 ? @"images/peiraiws-ceo-708.jpg": string.Empty
+
             };
             model.Description = $"Desc for article {model.ArticleId}, language {model.LanguageId} with id {model.Id}";
             model.Title = $"A title for {model.Id}";
@@ -50,6 +52,8 @@ namespace signaletest.Hubs
             public string Title { get; set; }
             public string Description { get; set; }
             public DateTimeOffset Timestamp { get; set; } = DateTimeOffset.UtcNow;
+
+            public string Image { get; set; } = @"images/peiraiws-ceo-708.jpg";
         }
     }
 }
